@@ -137,6 +137,18 @@ build_lib_example(
     ${libcsma}
 )
 
+# P4 DDOS attack demo
+build_lib_example(
+  NAME p4-ddos-attack
+  SOURCE_FILES p4-ddos-attack.cc
+  LIBRARIES_TO_LINK
+    ${libp4sim}
+    ${libinternet}
+    ${libapplications}
+    ${libnetwork}
+    ${libcsma}
+)
+
 # [ ================= Test ================= ]
 
 # custom header test
