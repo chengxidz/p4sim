@@ -381,7 +381,7 @@ int main(int argc, char *argv[]) {
           dstAddr.set(0x0a0a0a0a); // Example IP: 10.10.10.10
           actionData.push_back_action_data(dstAddr);
           controller.GetActionProfileMembers(j, profile);
-          bm::ActionProfile::mbr_hdl_t member;
+          bm::ActionProfile::mbr_hdl_t member{}; 
           controller.AddActionProfileMember(index, profile, action,
                                             std::move(actionData), member);
           controller.GetActionProfileMembers(j, profile);

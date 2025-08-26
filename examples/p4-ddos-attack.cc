@@ -42,6 +42,7 @@
 #include "ns3/packet-socket-helper.h"
 #include "ns3/pcap-file.h"
 
+#include "ns3/socket.h"
 #include <filesystem>
 #include <iomanip>
 
@@ -89,6 +90,18 @@ ConvertMacToHex(Address macAddr)
     return hexStream.str();
 }
 
+
+// add by xi
+static void
+SendPcapPkt(ns3::Ptr<ns3::Socket> sock,
+	    ns3::Ptr<ns3::Packet> pkt,
+            ns3::PacketSocketAddress dst)
+{
+    ns3::Address to = dst;
+    sock->SendTo(pkt,0,to);
+}
+
+
 int
 main(int argc, char* argv[])
 {
@@ -100,10 +113,10 @@ main(int argc, char* argv[])
     bool enableTracePcap = false; // 是否启用 Pcap 跟踪，捕获发送端和接收端的pcap
 
     // ============================ P4 文件的路径和配置 ============================
-    std::string p4JsonPath = "/home/mm/ns-3-dev-git/contrib/p4sim/examples/p4src/p4_ddos/ddos.json";
+    std::string p4JsonPath = "contrib/p4sim/examples/p4src/p4_ddos/ddos.json";
     std::string flowTablePath =
-        "/home/mm/ns-3-dev-git/contrib/p4sim/examples/p4src/p4_ddos/flowtable_0.txt";
-    std::string topoInput = "/home/mm/ns-3-dev-git/contrib/p4sim/examples/p4src/p4_ddos/topo.txt";
+        "contrib/p4sim/examples/p4src/p4_ddos/flowtable_0.txt";
+    std::string topoInput = "contrib/p4sim/examples/p4src/p4_ddos/topo.txt";
     std::string topoFormat("CSMA");
 
     // ============================  command line ============================
@@ -234,8 +247,11 @@ main(int argc, char* argv[])
 
     // === 在客户端节点（h0）上配置 PacketSocket ===
     Ptr<Node> clientNode = terminals.Get(clientI);
-    PacketSocketHelper packetSocket;
-    packetSocket.Install(clientNode);
+    // PacketSocketHelper packetSocket;
+    // packetSocket.Install(clientNode);
+    //edit by xi
+    Ptr<Socket> pktSock = Socket::CreateSocket(clientNode, PacketSocketFactory::GetTypeId());
+    pktSock->Bind();
 
     // === 创建 PacketSocketAddress（直接绑定到网卡） ===
     PacketSocketAddress socketAddr;
@@ -268,12 +284,16 @@ main(int argc, char* argv[])
         prevTime = currentTime;
 
         // 调度发送（自动按照 PCAP 的时间间隔发送）
-        Simulator::Schedule(delay,
-                            &PacketSocket::SendTo,
-                            clientNode->GetObject<PacketSocket>(),
-                            packet,
-                            0,
-                            socketAddr);
+        Simulator::Schedule(//delay,
+                           // &PacketSocket::SendTo,
+                           // &Socket::SendTo,
+                           // clientNode->GetObject<PacketSocket>(),
+                           // pktSock,
+                           // packet,
+                           // 0,
+                           // socketAddr
+                           // edit by xi
+                           delay,&SendPcapPkt,pktSock,packet,socketAddr);
     }
     pcapFile.Close();
 
