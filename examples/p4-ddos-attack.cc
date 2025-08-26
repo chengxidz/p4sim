@@ -46,6 +46,9 @@
 #include <filesystem>
 #include <iomanip>
 
+#include "ns3/csma-net-device.h"
+#include "ns3/config.h"
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("P4DDOSAttack");
@@ -123,6 +126,10 @@ main(int argc, char* argv[])
     CommandLine cmd;
     cmd.AddValue("pcap", "Trace packet pacp [true] or not[false]", enableTracePcap);
     cmd.Parse(argc, argv);
+
+    // edit by xi
+    Config::SetDefault("ns3::CsmaNetDevice::EncapsulationMode",
+                      EnumValue(ns3::CsmaNetDevice::DIX));
 
     // ============================ 构建网络和配置 ============================
 
